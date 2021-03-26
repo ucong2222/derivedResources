@@ -11,6 +11,7 @@ mybatis:
   type-aliases-package: com.sbs.example.derivedResources.dto
 custom:
   genFileDirPath: C:/work/derivedResourcesFile
+  tmpDirPath: "${custom.genFileDirPath}/tmp"
   logging:
     dir: log
     level: debug 
