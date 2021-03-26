@@ -10,10 +10,13 @@ import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Paths;
+import java.util.UUID;
 
 public class Util {
 	public static String downloadFileByHttp(String fileUrl, String outputDir) {
-		String filePath = outputDir + "/" + getFileNameFromUrl(fileUrl);
+		String originFileName = getFileNameFromUrl(fileUrl);
+		String tempFileName = UUID.randomUUID() + "." + getFileExt(originFileName);
+		String filePath = outputDir + "/" + tempFileName;
 
 		try (FileOutputStream fileOutputStream = new FileOutputStream(filePath)) {
 			ReadableByteChannel readableByteChannel = Channels.newChannel(new URL(fileUrl).openStream());
@@ -28,6 +31,13 @@ public class Util {
 		}
 
 		return filePath;
+	}
+
+	private static String getFileExt(String fileName) {
+		int pos = fileName.lastIndexOf(".");
+		String ext = fileName.substring(pos + 1);
+
+		return ext;
 	}
 
 	private static String getFileNameFromUrl(String fileUrl) {
