@@ -14,7 +14,9 @@ import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -248,6 +250,17 @@ public class Util {
 
 		try {
 			Files.copy(file.toPath(), destFile.toPath());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void moveFile(String filePath, String destFilePath) {
+		Path file = Paths.get(filePath);
+		Path destFile = Paths.get(destFilePath);
+
+		try {
+			Files.move(file, destFile, StandardCopyOption.REPLACE_EXISTING);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

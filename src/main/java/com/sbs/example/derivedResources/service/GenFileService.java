@@ -59,16 +59,16 @@ public class GenFileService {
 		String fileName = newGenFileId + "." + fileExt;
 
 		String destFileDirPath = genFileDirPath + "/" + relTypeCode + "/" + fileDir;
-		String destFilePath = destFileDirPath + "/" + fileName;
 		File destFileDir = new File(destFileDirPath);
-		File destFile = new File(destFilePath);
 
 		if (destFileDir.exists() == false) {
 			destFileDir.mkdirs();
 		}
 
-		new File(filePath).renameTo(destFile);
+		String destFilePath = destFileDirPath + "/" + fileName;
 
+		Util.moveFile(filePath, destFilePath);
+		
 		return saveMetaRd;
 	}
 }
