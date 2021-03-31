@@ -40,3 +40,7 @@ CREATE TABLE genFile (
 
 # originUrl 인덱스를 일반 인덱스로 변경
 ALTER TABLE deriveRequest DROP INDEX originUrl, ADD KEY originUrl (originUrl); 
+
+# 미디어의 너비, 높이 칼럼 추가
+ALTER TABLE genFile ADD COLUMN `width` SMALLINT(2) UNSIGNED NOT NULL AFTER `fileDir`;
+ALTER TABLE genFile ADD COLUMN `height` SMALLINT(2) UNSIGNED NOT NULL AFTER `width`;

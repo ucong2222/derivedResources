@@ -56,12 +56,34 @@ public class UsrImgController {
 			String filePath = deriveRequestService.getFilePathOrDownloadByOriginUrl(originUrl);
 
 			deriveRequestService.save(currentUrl, originUrl, width, height, maxWidth, filePath);
+			deriveRequest = deriveRequestService.getDeriveRequestByUrl(currentUrl);
 		}
 
-		deriveRequest = deriveRequestService.getDeriveRequestByUrl(currentUrl);
-		GenFile originGenFile = deriveRequestService.getOriginGenFile(deriveRequest);
+		int width = deriveRequest.getWidth();
+		int height = deriveRequest.getHeight();
+		int maxWidth = deriveRequest.getMaxWidth();
 
-		return getClientCachedResponseEntity(originGenFile, req);
+		if (width > 0 && height > 0) {
+			// 너비와 높이가 요구사항과 일치하는 genFile 검색
+			// 없으면 너비와 높이가 변경된 새로운 genFile 생성
+			GenFile derivedGenFile = deriveRequestService.getDerivedGenFileByWidthAndHeightOrMake(deriveRequest, width,
+					height);
+			return getClientCachedResponseEntity(derivedGenFile, req);
+		} else if (width > 0) {
+			// 너비가 요구사항과 일치하는 genFile 검색
+			// 없으면 너비가 변경된 새로운 genFile 생성
+			GenFile derivedGenFile = deriveRequestService.getDerivedGenFileByWidthOrMake(deriveRequest, width);
+			return getClientCachedResponseEntity(derivedGenFile, req);
+		} else if (maxWidth > 0) {
+			// 너비가 요구사항과 일치하는 genFile 중에서 가장 너비가 큰 genFile 검색
+			// 없으면 너비가 maxWidth인 새로운 genFile 생성
+			GenFile derivedGenFile = deriveRequestService.getDerivedGenFileByMaxWidthOrMake(deriveRequest, maxWidth);
+			return getClientCachedResponseEntity(derivedGenFile, req);
+		} else {
+			GenFile originGenFile = deriveRequestService.getOriginGenFile(deriveRequest);
+			return getClientCachedResponseEntity(originGenFile, req);
+		}
+
 	}
 
 	@GetMapping("/imgById")
