@@ -27,7 +27,7 @@ public class DeriveRequestService {
 		deriveRequestDao.saveMeta(param);
 		int newDeriveRequestId = Util.getAsInt(param.get("id"), 0);
 
-		String originFileName = Util.getFileNameFromUrl(url);
+		String originFileName = Util.getFileNameFromUrl(originUrl);
 
 		genFileService.save("deriveRequest", newDeriveRequestId, "common", "origin", 1, originFileName, filePath);
 	}
