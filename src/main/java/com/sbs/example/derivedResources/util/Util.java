@@ -267,9 +267,8 @@ public class Util {
 	}
 
 	public static String getUrlFromHttpServletRequest(HttpServletRequest req) {
-		String url = req.getScheme() + "://" + req.getServerName() + ":" + req.getServerPort() + req.getRequestURI()
-				+ "?" + req.getQueryString();
-
+		String url = req.getRequestURI() + "?" + req.getQueryString();
+		
 		return url;
 	}
 }

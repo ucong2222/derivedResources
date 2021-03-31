@@ -21,7 +21,7 @@ public class DeriveRequestService {
 	}
 
 	public void save(String url, String originUrl, int width, int height, int maxWidth, String filePath) {
-		Map<String, Object> param = Util.mapOf("url", url, "orignUrl", originUrl, "width", width, "height", height,
+		Map<String, Object> param = Util.mapOf("url", url, "originUrl", originUrl, "width", width, "height", height,
 				"maxWidth", maxWidth);
 
 		deriveRequestDao.saveMeta(param);
