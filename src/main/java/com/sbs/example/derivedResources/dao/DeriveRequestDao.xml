@@ -23,4 +23,14 @@
 		WHERE 1
 		AND url = #{url}
 	</select>
+	
+	<select id="getDeriveRequestByOriginUrl" resultType="DeriveRequest">
+		SELECT *
+		FROM
+		deriveRequest
+		WHERE 1
+		AND originUrl = #{originUrl}
+		ORDER BY id ASC
+		LIMIT 1
+	</select>
 </mapper>

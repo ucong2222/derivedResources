@@ -4,9 +4,9 @@ import java.io.File;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.sbs.example.derivedResources.app.App;
 import com.sbs.example.derivedResources.dao.GenFileDao;
 import com.sbs.example.derivedResources.dto.GenFile;
 import com.sbs.example.derivedResources.dto.ResultData;
@@ -14,9 +14,6 @@ import com.sbs.example.derivedResources.util.Util;
 
 @Service
 public class GenFileService {
-	@Value("${custom.genFileDirPath}")
-	private String genFileDirPath;
-
 	@Autowired
 	private GenFileDao genFileDao;
 
@@ -34,13 +31,6 @@ public class GenFileService {
 		return new ResultData("S-1", "성공하였습니다.", "id", id);
 	}
 
-	private void deleteGenFile(GenFile genFile) {
-		String filePath = genFile.getFilePath(genFileDirPath);
-		Util.delteFile(filePath);
-
-		genFileDao.deleteFile(genFile.getId());
-	}
-
 	public GenFile getGenFile(int id) {
 		return genFileDao.getGenFileById(id);
 	}
@@ -51,25 +41,31 @@ public class GenFileService {
 		String fileExtType2Code = Util.getFileExtType2CodeFromFileName(originFileName);
 		String fileExt = Util.getFileExtFromFileName(originFileName);
 		int fileSize = Util.getFileSize(filePath);
+
 		String fileDir = Util.getNowYearMonthDateStr();
+
 		ResultData saveMetaRd = saveMeta(relTypeCode, relId, typeCode, type2Code, fileNo, originFileName,
 				fileExtTypeCode, fileExtType2Code, fileExt, fileSize, fileDir);
 		int newGenFileId = (int) saveMetaRd.getBody().get("id");
 
+		if (fileDir.length() > 0)
+			saveOnDisk(newGenFileId, relTypeCode, filePath, fileDir, fileExt);
+
+		return saveMetaRd;
+	}
+
+	private void saveOnDisk(int newGenFileId, String relTypeCode, String filePath, String fileDir, String fileExt) {
 		String fileName = newGenFileId + "." + fileExt;
 
-		String destFileDirPath = genFileDirPath + "/" + relTypeCode + "/" + fileDir;
+		String destFileDirPath = App.getGenFileDirPath() + "/" + relTypeCode + "/" + fileDir;
 		File destFileDir = new File(destFileDirPath);
 
 		if (destFileDir.exists() == false) {
 			destFileDir.mkdirs();
 		}
-
 		String destFilePath = destFileDirPath + "/" + fileName;
 
 		Util.moveFile(filePath, destFilePath);
-
-		return saveMetaRd;
 	}
 
 	GenFile getGenFile(String relTypeCode, int relId, String typeCode, String type2Code, int fileNo) {

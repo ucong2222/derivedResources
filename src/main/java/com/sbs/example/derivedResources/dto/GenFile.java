@@ -1,6 +1,7 @@
 package com.sbs.example.derivedResources.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.sbs.example.derivedResources.app.App;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -28,8 +29,8 @@ public class GenFile {
 	private String originFileName;
 
 	@JsonIgnore
-	public String getFilePath(String genFileDirPath) {
-		return genFileDirPath + getBaseFileUri();
+	public String getFilePath() {
+		return App.getGenFileDirPath() + getBaseFileUri();
 	}
 
 	@JsonIgnore

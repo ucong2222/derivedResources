@@ -12,4 +12,6 @@ public interface DeriveRequestDao {
 	DeriveRequest getDeriveRequestByUrl(@Param("url") String url);
 
 	void saveMeta(Map<String, Object> param);
+	
+	DeriveRequest getDeriveRequestByOriginUrl(@Param("originUrl") String originUrl);
 }

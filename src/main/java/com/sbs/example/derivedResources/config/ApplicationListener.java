@@ -8,6 +8,8 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
+import com.sbs.example.derivedResources.app.App;
+
 @Component
 @Order(0)
 class MyApplicationListener implements ApplicationListener<ApplicationReadyEvent> {
@@ -19,8 +21,10 @@ class MyApplicationListener implements ApplicationListener<ApplicationReadyEvent
 
 	@Override
 	public void onApplicationEvent(ApplicationReadyEvent event) {
-		File genFileDir = new File(genFileDirPath);
-		File tmpDir = new File(tmpDirPath);
+		App.init(genFileDirPath, tmpDirPath);
+
+		File genFileDir = new File(App.getGenFileDirPath());
+		File tmpDir = new File(App.getTmpDirPath());
 
 		if (genFileDir.exists() == false) {
 			genFileDir.mkdirs();

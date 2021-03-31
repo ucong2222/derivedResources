@@ -53,7 +53,7 @@ public class UsrImgController {
 			int width = Util.getAsInt(param.get("width"), 0);
 			int height = Util.getAsInt(param.get("height"), 0);
 			int maxWidth = Util.getAsInt(param.get("maxWidth"), 0);
-			String filePath = Util.downloadFileByHttp(originUrl, tmpDirPath);
+			String filePath = deriveRequestService.getFilePathOrDownloadByOriginUrl(originUrl);
 
 			deriveRequestService.save(currentUrl, originUrl, width, height, maxWidth, filePath);
 		}
@@ -73,7 +73,7 @@ public class UsrImgController {
 
 	private ResponseEntity<Resource> getClientCachedResponseEntity(GenFile genFile, HttpServletRequest req)
 			throws FileNotFoundException {
-		String filePath = genFile.getFilePath(genFileDirPath);
+		String filePath = genFile.getFilePath();
 
 		Resource resource = new InputStreamResource(new FileInputStream(filePath));
 
