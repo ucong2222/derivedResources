@@ -14,4 +14,7 @@ public interface GenFileDao {
 	GenFile getGenFileById(@Param("id") int id);
 
 	void deleteFile(@Param("id") int id);
+
+	GenFile getGenFile(@Param("relTypeCode") String relTypeCode, @Param("relId") int relId,
+			@Param("typeCode") String typeCode, @Param("type2Code") String type2Code, @Param("fileNo") int fileNo);
 }

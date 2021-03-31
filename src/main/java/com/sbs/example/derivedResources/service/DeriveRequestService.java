@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.sbs.example.derivedResources.dao.DeriveRequestDao;
 import com.sbs.example.derivedResources.dto.DeriveRequest;
+import com.sbs.example.derivedResources.dto.GenFile;
 import com.sbs.example.derivedResources.util.Util;
 
 @Service
@@ -30,5 +31,9 @@ public class DeriveRequestService {
 		String originFileName = Util.getFileNameFromUrl(originUrl);
 
 		genFileService.save("deriveRequest", newDeriveRequestId, "common", "origin", 1, originFileName, filePath);
+	}
+
+	public GenFile getOriginGenFile(DeriveRequest deriveRequest) {
+		return genFileService.getGenFile("deriveRequest", deriveRequest.getId(), "common", "origin", 1);
 	}
 }

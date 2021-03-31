@@ -68,7 +68,11 @@ public class GenFileService {
 		String destFilePath = destFileDirPath + "/" + fileName;
 
 		Util.moveFile(filePath, destFilePath);
-		
+
 		return saveMetaRd;
+	}
+
+	GenFile getGenFile(String relTypeCode, int relId, String typeCode, String type2Code, int fileNo) {
+		return genFileDao.getGenFile(relTypeCode, relId, typeCode, type2Code, fileNo);
 	}
 }
