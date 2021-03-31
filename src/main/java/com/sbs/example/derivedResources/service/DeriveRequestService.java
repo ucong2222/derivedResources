@@ -20,8 +20,9 @@ public class DeriveRequestService {
 		return deriveRequestDao.getDeriveRequestByUrl(url);
 	}
 
-	public void save(String url, int width, int height, int maxWidth, String filePath) {
-		Map<String, Object> param = Util.mapOf("url", url, "width", width, "height", height, "maxWidth", maxWidth);
+	public void save(String url, String originUrl, int width, int height, int maxWidth, String filePath) {
+		Map<String, Object> param = Util.mapOf("url", url, "orignUrl", originUrl, "width", width, "height", height,
+				"maxWidth", maxWidth);
 
 		deriveRequestDao.saveMeta(param);
 		int newDeriveRequestId = Util.getAsInt(param.get("id"), 0);

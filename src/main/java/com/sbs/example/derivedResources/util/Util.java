@@ -93,7 +93,7 @@ public class Util {
 
 		return map;
 	}
-	
+
 	public static int getAsInt(Object object, int defaultValue) {
 		if (object instanceof BigInteger) {
 			return ((BigInteger) object).intValue();
@@ -239,7 +239,7 @@ public class Util {
 	}
 
 	public static int getFileSize(String filePath) {
-		return (int)new File(filePath).length();
+		return (int) new File(filePath).length();
 	}
 
 	public static void copyFile(String filePath, String destFilePath) {
@@ -264,5 +264,12 @@ public class Util {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	public static String getUrlFromHttpServletRequest(HttpServletRequest req) {
+		String url = req.getScheme() + "://" + req.getServerName() + ":" + req.getServerPort() + req.getRequestURI()
+				+ "?" + req.getQueryString();
+
+		return url;
 	}
 }

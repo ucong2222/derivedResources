@@ -9,9 +9,8 @@
 		INSERT INTO deriveRequest
 		SET regDate = NOW(),
 		updateDate = NOW(),
-		url =
-		#{url},
-		originUrl = #{url},
+		url = #{url},
+		originUrl = #{originUrl},
 		width = #{width},
 		height = #{height},
 		maxWidth = #{maxWidth}

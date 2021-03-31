@@ -27,21 +27,22 @@ public class UsrImgController {
 
 	@RequestMapping("/img")
 	public DeriveRequest showImg(HttpServletRequest req, @RequestParam Map<String, Object> param) {
+		String currentUrl = Util.getUrlFromHttpServletRequest(req);
 		String queryString = req.getQueryString();
-		String url = queryString.split("url=")[1];
+		String originUrl = queryString.split("url=")[1];
 
-		DeriveRequest deriveRequest = deriveRequestService.getDeriveRequestByUrl(url);
+		DeriveRequest deriveRequest = deriveRequestService.getDeriveRequestByUrl(originUrl);
 
 		if (deriveRequest == null) {
 			int width = Util.getAsInt(param.get("width"), 0);
 			int height = Util.getAsInt(param.get("height"), 0);
 			int maxWidth = Util.getAsInt(param.get("maxWidth"), 0);
-			String filePath = Util.downloadFileByHttp(url, tmpDirPath);
+			String filePath = Util.downloadFileByHttp(originUrl, tmpDirPath);
 
-			deriveRequestService.save(url, width, height, maxWidth, filePath);
+			deriveRequestService.save(currentUrl, originUrl, width, height, maxWidth, filePath);
 		}
 
-		deriveRequest = deriveRequestService.getDeriveRequestByUrl(url);
+		deriveRequest = deriveRequestService.getDeriveRequestByUrl(currentUrl);
 
 		return deriveRequest;
 	}

@@ -37,3 +37,6 @@ CREATE TABLE genFile (
   PRIMARY KEY (id),
   KEY relId (relId,relTypeCode,typeCode,type2Code,fileNo)
 ); 
+
+# originUrl 인덱스를 일반 인덱스로 변경
+ALTER TABLE deriveRequest DROP INDEX originUrl, ADD KEY originUrl (originUrl); 
