@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -59,7 +61,19 @@ public class UsrImgController {
 		deriveRequest = deriveRequestService.getDeriveRequestByUrl(currentUrl);
 		GenFile originGenFile = deriveRequestService.getOriginGenFile(deriveRequest);
 
-		String filePath = originGenFile.getFilePath(genFileDirPath);
+		return getClientCachedResponseEntity(originGenFile, req);
+	}
+
+	@GetMapping("/imgById")
+	public ResponseEntity<Resource> downloadFile(int id, HttpServletRequest req) throws IOException {
+		GenFile genFile = genFileService.getGenFile(id);
+
+		return getClientCachedResponseEntity(genFile, req);
+	}
+
+	private ResponseEntity<Resource> getClientCachedResponseEntity(GenFile genFile, HttpServletRequest req)
+			throws FileNotFoundException {
+		String filePath = genFile.getFilePath(genFileDirPath);
 
 		Resource resource = new InputStreamResource(new FileInputStream(filePath));
 
@@ -70,23 +84,7 @@ public class UsrImgController {
 			contentType = "application/octet-stream";
 		}
 
-		return ResponseEntity.ok().contentType(MediaType.parseMediaType(contentType)).body(resource);
-	}
-
-	@GetMapping("/imgById")
-	public ResponseEntity<Resource> downloadFile(int id, HttpServletRequest request) throws IOException {
-		GenFile genFile = genFileService.getGenFile(id);
-		String filePath = genFile.getFilePath(genFileDirPath);
-
-		Resource resource = new InputStreamResource(new FileInputStream(filePath));
-
-		// Try to determine file's content type
-		String contentType = request.getServletContext().getMimeType(new File(filePath).getAbsolutePath());
-
-		if (contentType == null) {
-			contentType = "application/octet-stream";
-		}
-
-		return ResponseEntity.ok().contentType(MediaType.parseMediaType(contentType)).body(resource);
+		return ResponseEntity.ok().cacheControl(CacheControl.maxAge(60 * 60 * 24 * 30, TimeUnit.SECONDS))
+				.contentType(MediaType.parseMediaType(contentType)).body(resource);
 	}
 }
