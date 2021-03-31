@@ -31,7 +31,7 @@ public class UsrImgController {
 		String queryString = req.getQueryString();
 		String originUrl = queryString.split("url=")[1];
 
-		DeriveRequest deriveRequest = deriveRequestService.getDeriveRequestByUrl(originUrl);
+		DeriveRequest deriveRequest = deriveRequestService.getDeriveRequestByUrl(currentUrl);
 
 		if (deriveRequest == null) {
 			int width = Util.getAsInt(param.get("width"), 0);
