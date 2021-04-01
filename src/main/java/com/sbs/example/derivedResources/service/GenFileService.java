@@ -45,18 +45,18 @@ public class GenFileService {
 		String fileExtType2Code = Util.getFileExtType2CodeFromFileName(originFileName);
 		String fileExt = Util.getFileExtFromFileName(originFileName);
 		int fileSize = Util.getFileSize(filePath);
-		
+
 		int width = 0;
 		int height = 0;
 
-		if ( fileExtTypeCode.equals("img") ) {
+		if (fileExtTypeCode.equals("img")) {
 			try {
 				BufferedImage bufferedImage = ImageIO.read(new File(filePath));
 				width = bufferedImage.getWidth();
 				height = bufferedImage.getHeight();
 			} catch (IOException e) {
 				e.printStackTrace();
-			} 
+			}
 		}
 
 		String fileDir = Util.getNowYearMonthDateStr();
@@ -88,16 +88,32 @@ public class GenFileService {
 	GenFile getGenFile(String relTypeCode, int relId, String typeCode, String type2Code, int fileNo) {
 		return genFileDao.getGenFile(relTypeCode, relId, typeCode, type2Code, fileNo);
 	}
-	
-	public GenFile getGenFileByRelTypeCodeAndRelIdAndFileExtTypeCodeAndWidthAndHeight(String relTypeCode, int relId, String fileExtTypeCode, int width, int height) {
-		return genFileDao.getGenFileByRelTypeCodeAndRelIdAndFileExtTypeCodeAndWidthAndHeight(relTypeCode, relId, fileExtTypeCode, width, height);
+
+	public GenFile getGenFileByRelTypeCodeAndRelIdAndFileExtTypeCodeAndWidthAndHeight(String relTypeCode, int relId,
+			String fileExtTypeCode, int width, int height) {
+		GenFile genFile = null;
+		genFile = genFileDao.getGenFileByRelTypeCodeAndRelIdAndFileExtTypeCodeAndWidthAndHeight(relTypeCode, relId,
+				fileExtTypeCode, width, height);
+
+		if (genFile != null) {
+			return genFile;
+		}
+
+		genFile = genFileDao.getGenFileByRelTypeCodeAndRelIdAndFileExtTypeCodeAndWidthAndHeight(relTypeCode, relId,
+				fileExtTypeCode, width, height - 1);
+
+		if (genFile != null) {
+			return genFile;
+		}
+
+		genFile = genFileDao.getGenFileByRelTypeCodeAndRelIdAndFileExtTypeCodeAndWidthAndHeight(relTypeCode, relId,
+				fileExtTypeCode, width, height + 1);
+
+		if (genFile != null) {
+			return genFile;
+		}
+		
+		return null;
 	}
 
-	public GenFile getGenFileByRelTypeCodeAndRelIdAndFileExtTypeCodeAndWidth(String relTypeCode, int relId, String fileExtTypeCode, int width) {
-		return genFileDao.getGenFileByRelTypeCodeAndRelIdAndFileExtTypeCodeAndWidth(relTypeCode, relId, fileExtTypeCode, width);
-	}
-
-	public GenFile getGenFileByRelTypeCodeAndRelIdAndFileExtTypeCodeAndMaxWidth(String relTypeCode, int relId, String fileExtTypeCode, int maxWidth) {
-		return genFileDao.getGenFileByRelTypeCodeAndRelIdAndFileExtTypeCodeAndMaxWidth(relTypeCode, relId, fileExtTypeCode, maxWidth);
-	}
 }

@@ -100,17 +100,34 @@ public class DeriveRequestService {
 
 		DeriveRequest originDeriveRequest = deriveRequestDao.getDeriveRequestByOriginUrl(deriveRequest.getOriginUrl());
 
-		return genFileService.getGenFileByRelTypeCodeAndRelIdAndFileExtTypeCodeAndWidth("deriveRequest",
-				originDeriveRequest.getId(), "img", width);
+		GenFile originGenFile = getOriginGenFile(originDeriveRequest);
+
+		int originWidth = originGenFile.getWidth();
+		int originHeight = originGenFile.getHeight();
+		int height = originHeight * width / originWidth;
+
+		return genFileService.getGenFileByRelTypeCodeAndRelIdAndFileExtTypeCodeAndWidthAndHeight("deriveRequest",
+				originDeriveRequest.getId(), "img", width, height);
 	}
 
 	public GenFile getDerivedGenFileByMaxWidth(DeriveRequest deriveRequest, int maxWidth) {
 		DeriveRequest originDeriveRequest = deriveRequestDao.getDeriveRequestByOriginUrl(deriveRequest.getOriginUrl());
 
-		return genFileService.getGenFileByRelTypeCodeAndRelIdAndFileExtTypeCodeAndMaxWidth("deriveRequest",
-				originDeriveRequest.getId(), "img", maxWidth);
+		GenFile originGenFile = getOriginGenFile(originDeriveRequest);
+
+		int originWidth = originGenFile.getWidth();
+
+		if (originWidth <= maxWidth) {
+			return originGenFile;
+		}
+
+		int originHeight = originGenFile.getHeight();
+		int height = originHeight * maxWidth / originWidth;
+
+		return genFileService.getGenFileByRelTypeCodeAndRelIdAndFileExtTypeCodeAndWidthAndHeight("deriveRequest",
+				originDeriveRequest.getId(), "img", maxWidth, height);
 	}
-	
+
 	private GenFile makeDerivedGenFileByWidthAndHeight(DeriveRequest deriveRequest, int width, int height) {
 		DeriveRequest originDeriveRequest = deriveRequestDao.getDeriveRequestByOriginUrl(deriveRequest.getOriginUrl());
 
@@ -120,8 +137,9 @@ public class DeriveRequestService {
 
 		Util.resizeImgWidth(originGenFile.getFilePath(), destFilePath, width, height);
 
-		ResultData saveRd = genFileService.save("deriveRequest", originGenFile.getId(), "common", "derived", 0, originGenFile.getOriginFileName(), destFilePath);
-		int newGenId = (int)saveRd.getBody().get("id");
+		ResultData saveRd = genFileService.save("deriveRequest", originGenFile.getId(), "common", "derived", 0,
+				originGenFile.getOriginFileName(), destFilePath);
+		int newGenId = (int) saveRd.getBody().get("id");
 
 		return genFileService.getGenFile(newGenId);
 	}
@@ -139,8 +157,9 @@ public class DeriveRequestService {
 		int height = originHeight * width / originWidth;
 		Util.resizeImgWidth(originGenFile.getFilePath(), destFilePath, width, height);
 
-		ResultData saveRd = genFileService.save("deriveRequest", originGenFile.getId(), "common", "derived", 0, originGenFile.getOriginFileName(), destFilePath);
-		int newGenId = (int)saveRd.getBody().get("id");
+		ResultData saveRd = genFileService.save("deriveRequest", originGenFile.getId(), "common", "derived", 0,
+				originGenFile.getOriginFileName(), destFilePath);
+		int newGenId = (int) saveRd.getBody().get("id");
 
 		return genFileService.getGenFile(newGenId);
 	}

@@ -22,10 +22,4 @@ public interface GenFileDao {
 			@Param("relId") int relId, @Param("fileExtTypeCode") String fileExtTypeCode, @Param("width") int width,
 			@Param("height") int height);
 
-	GenFile getGenFileByRelTypeCodeAndRelIdAndFileExtTypeCodeAndWidth(@Param("relTypeCode") String relTypeCode,
-			@Param("relId") int relId, @Param("fileExtTypeCode") String fileExtTypeCode, @Param("width") int width);
-
-	GenFile getGenFileByRelTypeCodeAndRelIdAndFileExtTypeCodeAndMaxWidth(@Param("relTypeCode") String relTypeCode,
-			@Param("relId") int relId, @Param("fileExtTypeCode") String fileExtTypeCode,
-			@Param("maxWidth") int maxWidth);
 }
