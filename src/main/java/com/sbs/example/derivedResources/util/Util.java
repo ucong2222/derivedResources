@@ -1,5 +1,6 @@
 package com.sbs.example.derivedResources.util;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -25,7 +26,12 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
+
+import org.imgscalr.Scalr;
+import org.imgscalr.Scalr.Method;
+import org.imgscalr.Scalr.Mode;
 
 public class Util {
 	public static String downloadFileByHttp(String fileUrl, String outputDir) {
@@ -270,5 +276,35 @@ public class Util {
 		String url = req.getRequestURI() + "?" + req.getQueryString();
 		
 		return url;
+	}
+	
+	public static void resizeImgWidth(String filePath, String destFilePath, int width, int height) {
+		try {
+			BufferedImage bufferedImage = ImageIO.read(new File(filePath));
+
+			int originWidth = bufferedImage.getWidth();
+			int originHeight = bufferedImage.getHeight();
+
+			int newWidth = originWidth;
+			int newHeight = (originWidth * height) / width;
+
+			if (newHeight > originHeight) {
+				newWidth = (originHeight * width) / height;
+				newHeight = originHeight;
+			}
+
+			BufferedImage cropedBufferedImage = Scalr.crop(bufferedImage, (originWidth - newWidth) / 2,
+					(originHeight - newHeight) / 2, newWidth, newHeight);
+			BufferedImage destBufferedImage = Scalr.resize(cropedBufferedImage, Method.ULTRA_QUALITY, Mode.AUTOMATIC,
+					width, height);
+
+			String destFileExt = Util.getFileExt(destFilePath);
+			FileOutputStream fileOutputStream = new FileOutputStream(destFilePath);
+			ImageIO.write(destBufferedImage, destFileExt, fileOutputStream);
+			fileOutputStream.close();
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }
