@@ -44,3 +44,15 @@ ALTER TABLE deriveRequest DROP INDEX originUrl, ADD KEY originUrl (originUrl);
 # 미디어의 너비, 높이 칼럼 추가
 ALTER TABLE genFile ADD COLUMN `width` SMALLINT(2) UNSIGNED NOT NULL AFTER `fileDir`;
 ALTER TABLE genFile ADD COLUMN `height` SMALLINT(2) UNSIGNED NOT NULL AFTER `width`;
+
+# 원본 파일을 가지고 있는 요청인지 여부 추가
+ALTER TABLE deriveRequest
+ADD COLUMN `originStatus` TINYINT(1) UNSIGNED DEFAULT 0 NOT NULL
+COMMENT '원본 파일을 가지고 있는 요청인지 여부'
+AFTER `originUrl`;
+
+# 관련된 파일 번호
+ALTER TABLE deriveRequest
+ADD COLUMN `genFileId` INT(1) UNSIGNED DEFAULT 0 NOT NULL
+COMMENT '관련된 파일 번호'
+AFTER `originUrl`;

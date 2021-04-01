@@ -23,31 +23,22 @@ public class DeriveRequestService {
 		return deriveRequestDao.getDeriveRequestByUrl(url);
 	}
 
-	public void save(String url, String originUrl, int width, int height, int maxWidth, String filePath) {
-		Map<String, Object> param = Util.mapOf("url", url, "originUrl", originUrl, "width", width, "height", height,
-				"maxWidth", maxWidth);
-
-		deriveRequestDao.saveMeta(param);
-		boolean isNewBornFile = App.isInGenFileDir(filePath) == false;
-
-		if (isNewBornFile) {
-			int newDeriveRequestId = Util.getAsInt(param.get("id"), 0);
-			String originFileName = Util.getFileNameFromUrl(originUrl);
-			genFileService.save("deriveRequest", newDeriveRequestId, "common", "origin", 1, originFileName, filePath);
-		}
-	}
-
 	public GenFile getOriginGenFile(DeriveRequest deriveRequest) {
-		DeriveRequest originDeriveRequest = deriveRequestDao.getDeriveRequestByOriginUrl(deriveRequest.getOriginUrl());
+		DeriveRequest originDeriveRequest = null;
+
+		if ( deriveRequest.isOriginStatus() ) {
+			originDeriveRequest = deriveRequest;
+		}
+		else {
+			originDeriveRequest = deriveRequestDao.getDeriveRequestByOriginUrl(deriveRequest.getOriginUrl());
+		}
 
 		return genFileService.getGenFile("deriveRequest", originDeriveRequest.getId(), "common", "origin", 1);
 	}
 
-	public String getFilePathOrDownloadByOriginUrl(String originUrl) {
-		DeriveRequest deriveRequest = deriveRequestDao.getDeriveRequestByOriginUrl(originUrl);
-
-		if (deriveRequest != null) {
-			GenFile originGenFile = getOriginGenFile(deriveRequest);
+	public String getFilePathOrDownloadByOriginUrl(String originUrl, DeriveRequest originDeriveRequest) {
+		if (originDeriveRequest != null) {
+			GenFile originGenFile = getOriginGenFile(originDeriveRequest);
 
 			if (originGenFile != null) {
 				return originGenFile.getFilePath();
@@ -98,22 +89,18 @@ public class DeriveRequestService {
 
 	public GenFile getDerivedGenFileByWidth(DeriveRequest deriveRequest, int width) {
 
-		DeriveRequest originDeriveRequest = deriveRequestDao.getDeriveRequestByOriginUrl(deriveRequest.getOriginUrl());
-
-		GenFile originGenFile = getOriginGenFile(originDeriveRequest);
-
+		GenFile originGenFile = getOriginGenFile(deriveRequest);
+		
 		int originWidth = originGenFile.getWidth();
 		int originHeight = originGenFile.getHeight();
 		int height = originHeight * width / originWidth;
 
 		return genFileService.getGenFileByRelTypeCodeAndRelIdAndFileExtTypeCodeAndWidthAndHeight("deriveRequest",
-				originDeriveRequest.getId(), "img", width, height);
+				deriveRequest.getId(), "img", width, height);
 	}
 
 	public GenFile getDerivedGenFileByMaxWidth(DeriveRequest deriveRequest, int maxWidth) {
-		DeriveRequest originDeriveRequest = deriveRequestDao.getDeriveRequestByOriginUrl(deriveRequest.getOriginUrl());
-
-		GenFile originGenFile = getOriginGenFile(originDeriveRequest);
+		GenFile originGenFile = getOriginGenFile(deriveRequest);
 
 		int originWidth = originGenFile.getWidth();
 
@@ -125,19 +112,17 @@ public class DeriveRequestService {
 		int height = originHeight * maxWidth / originWidth;
 
 		return genFileService.getGenFileByRelTypeCodeAndRelIdAndFileExtTypeCodeAndWidthAndHeight("deriveRequest",
-				originDeriveRequest.getId(), "img", maxWidth, height);
+				deriveRequest.getId(), "img", maxWidth, height);
 	}
 
 	private GenFile makeDerivedGenFileByWidthAndHeight(DeriveRequest deriveRequest, int width, int height) {
-		DeriveRequest originDeriveRequest = deriveRequestDao.getDeriveRequestByOriginUrl(deriveRequest.getOriginUrl());
-
 		GenFile originGenFile = getOriginGenFile(deriveRequest);
 
 		String destFilePath = App.getNewTmpFilePath(originGenFile.getFileExt());
 
 		Util.resizeImgWidth(originGenFile.getFilePath(), destFilePath, width, height);
 
-		ResultData saveRd = genFileService.save("deriveRequest", originGenFile.getId(), "common", "derived", 0,
+		ResultData saveRd = genFileService.save("deriveRequest", deriveRequest.getId(), "common", "derived", 0,
 				originGenFile.getOriginFileName(), destFilePath);
 		int newGenId = (int) saveRd.getBody().get("id");
 
@@ -145,8 +130,6 @@ public class DeriveRequestService {
 	}
 
 	private GenFile makeDerivedGenFileByWidth(DeriveRequest deriveRequest, int width) {
-		DeriveRequest originDeriveRequest = deriveRequestDao.getDeriveRequestByOriginUrl(deriveRequest.getOriginUrl());
-
 		GenFile originGenFile = getOriginGenFile(deriveRequest);
 
 		String destFilePath = App.getNewTmpFilePath(originGenFile.getFileExt());
@@ -157,10 +140,42 @@ public class DeriveRequestService {
 		int height = originHeight * width / originWidth;
 		Util.resizeImgWidth(originGenFile.getFilePath(), destFilePath, width, height);
 
-		ResultData saveRd = genFileService.save("deriveRequest", originGenFile.getId(), "common", "derived", 0,
+		ResultData saveRd = genFileService.save("deriveRequest", deriveRequest.getId(), "common", "derived", 0,
 				originGenFile.getOriginFileName(), destFilePath);
 		int newGenId = (int) saveRd.getBody().get("id");
 
 		return genFileService.getGenFile(newGenId);
+	}
+	
+	public DeriveRequest getDeriveRequestByOriginUrl(String originUrl) {
+		return deriveRequestDao.getDeriveRequestByOriginUrl(originUrl);
+	}
+
+	public int save(String url, String originUrl, int width, int height, int maxWidth) {
+		DeriveRequest originDeriveRequest = getDeriveRequestByOriginUrl(originUrl);
+		boolean originStatus = originDeriveRequest == null;
+
+		String filePath = getFilePathOrDownloadByOriginUrl(originUrl, originDeriveRequest);
+
+		Map<String, Object> param = Util.mapOf("url", url, "originUrl", originUrl, "originStatus", originStatus, "width", width, "height", height,
+				"maxWidth", maxWidth);
+
+		deriveRequestDao.save(param);
+		int newDeriveRequestId = Util.getAsInt(param.get("id"), 0);
+
+		if (originStatus) {
+			String originFileName = Util.getFileNameFromUrl(originUrl);
+			genFileService.save("deriveRequest", newDeriveRequestId, "common", "origin", 1, originFileName, filePath);
+		}
+
+		return newDeriveRequestId;
+	}
+
+	public void updateDerivedGenFileId(int id, int genFileId) {
+		deriveRequestDao.updateDerivedGenFileId(id, genFileId);
+	}
+
+	public DeriveRequest getDeriveRequestById(int id) {
+		return deriveRequestDao.getDeriveRequestById(id);
 	}
 }

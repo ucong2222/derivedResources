@@ -5,12 +5,13 @@
 
 <mapper
 	namespace="com.sbs.example.derivedResources.dao.DeriveRequestDao">
-	<insert id="saveMeta" useGeneratedKeys="true" keyProperty="id">
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
 		INSERT INTO deriveRequest
 		SET regDate = NOW(),
 		updateDate = NOW(),
 		url = #{url},
 		originUrl = #{originUrl},
+		originStatus = #{originStatus},
 		width = #{width},
 		height = #{height},
 		maxWidth = #{maxWidth}
@@ -33,4 +34,19 @@
 		ORDER BY id ASC
 		LIMIT 1
 	</select>
+	
+	<update id="updateDerivedGenFileId">
+		UPDATE deriveRequest
+		SET genFileId = #{genFileId}
+		WHERE id = #{id}
+	</update>
+	
+	<select id="getDeriveRequestById" resultType="DeriveRequest">
+		SELECT *
+		FROM
+		deriveRequest
+		WHERE 1
+		AND id = #{id}
+	</select>
+	
 </mapper>

@@ -13,7 +13,9 @@ public class DeriveRequest {
 	private String updateDate;
 	private String url;
 	private String originUrl;
+	private boolean originStatus;
 	private int width;
 	private int height;
 	private int maxWidth;
+	private int genFileId;
 }

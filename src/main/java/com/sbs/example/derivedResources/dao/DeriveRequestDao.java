@@ -11,7 +11,11 @@ import com.sbs.example.derivedResources.dto.DeriveRequest;
 public interface DeriveRequestDao {
 	DeriveRequest getDeriveRequestByUrl(@Param("url") String url);
 
-	void saveMeta(Map<String, Object> param);
+	int save(Map<String, Object> param);
 	
 	DeriveRequest getDeriveRequestByOriginUrl(@Param("originUrl") String originUrl);
+	
+	void updateDerivedGenFileId(@Param("id") int id, @Param("genFileId") int genFileId);
+
+	DeriveRequest getDeriveRequestById(@Param("id") int id);
 }
