@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import javax.servlet.http.HttpServletRequest;
@@ -17,7 +16,6 @@ import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -26,6 +24,10 @@ import com.sbs.example.derivedResources.dto.GenFile;
 import com.sbs.example.derivedResources.service.DeriveRequestService;
 import com.sbs.example.derivedResources.service.GenFileService;
 import com.sbs.example.derivedResources.util.Util;
+
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 
 @RestController
 public class UsrImgController {
@@ -40,19 +42,15 @@ public class UsrImgController {
 	@Autowired
 	private DeriveRequestService deriveRequestService;
 
-	@RequestMapping("/img")
-	public ResponseEntity<Resource> showImg(HttpServletRequest req, @RequestParam Map<String, Object> param,
-			@RequestParam("url") String originUrl)
-			throws FileNotFoundException {
+	@GetMapping("/img")
+	public ResponseEntity<Resource> showImg(HttpServletRequest req, @RequestParam("url") String originUrl,
+			@RequestParam(defaultValue = "0") int width, @RequestParam(defaultValue = "0") int height,
+			@RequestParam(defaultValue = "0") int maxWidth) throws FileNotFoundException {
 		String currentUrl = Util.getUrlFromHttpServletRequest(req);
 
 		DeriveRequest deriveRequest = deriveRequestService.getDeriveRequestByUrl(currentUrl);
 
-		if (deriveRequest == null) {
-			int width = Util.getAsInt(param.get("width"), 0);
-			int height = Util.getAsInt(param.get("height"), 0);
-			int maxWidth = Util.getAsInt(param.get("maxWidth"), 0);
-			
+		if (deriveRequest == null) {		
 			int newDeriveRequestId = deriveRequestService.save(currentUrl, originUrl, width, height, maxWidth);
 			deriveRequest = deriveRequestService.getDeriveRequestById(newDeriveRequestId);
 
@@ -87,7 +85,9 @@ public class UsrImgController {
 
 	}
 
+	@ApiOperation(value = "이미지번호로 이미지 출력", notes = "입력받은 id에 해당하는 genFile을 출력합니다.")
 	@GetMapping("/imgById")
+	@ApiImplicitParams({ @ApiImplicitParam(name = "id", value = "genFileId", required = true) })
 	public ResponseEntity<Resource> downloadFile(int id, HttpServletRequest req) throws IOException {
 		GenFile genFile = genFileService.getGenFile(id);
 
