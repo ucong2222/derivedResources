@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.tika.Tika;
 import org.imgscalr.Scalr;
 import org.imgscalr.Scalr.Method;
 import org.imgscalr.Scalr.Mode;
@@ -36,7 +37,13 @@ import org.imgscalr.Scalr.Mode;
 public class Util {
 	public static String downloadFileByHttp(String fileUrl, String outputDir) {
 		String originFileName = getFileNameFromUrl(fileUrl);
-		String tempFileName = UUID.randomUUID() + "." + getFileExt(originFileName);
+		String fileExt = getFileExt(originFileName);
+
+		if (fileExt.length() == 0) {
+			fileExt = "tmp";
+		}
+
+		String tempFileName = UUID.randomUUID() + "." + fileExt;
 		String filePath = outputDir + "/" + tempFileName;
 
 		try (FileOutputStream fileOutputStream = new FileOutputStream(filePath)) {
@@ -50,14 +57,42 @@ public class Util {
 			e.printStackTrace();
 			return "";
 		}
+		
+		if (fileExt.equals("tmp")) {
+			String ext = getFileExt(new File(filePath));
+
+			String newFilePath = filePath.replaceAll("\\.tmp", "\\." + ext);
+			moveFile(filePath, newFilePath);
+			filePath = newFilePath;
+		}
 
 		return filePath;
+	}
+	
+	private static String getFileExt(File file) {
+		Tika tika = new Tika();
+		String mimeType = "";
+		try {
+			mimeType = tika.detect(file);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return "";
+		}
+		String ext = mimeType.replaceAll("image/", "");
+		ext = ext.replaceAll("jpeg", "jpg");
+
+		return ext;
 	}
 
 	private static String getFileExt(String fileName) {
 		int pos = fileName.lastIndexOf(".");
-		String ext = fileName.substring(pos + 1);
 
+		if (pos == -1) {
+			return "";
+		}
+
+		String ext = fileName.substring(pos + 1).trim();
+		
 		return ext;
 	}
 
