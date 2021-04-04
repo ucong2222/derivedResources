@@ -49,7 +49,7 @@ spring:
     username: sbsstLocal
     password: sbs123414
 custom:
-  genFileDirPath: /opt/tomcat/apache-tomcat-9.0.37/derived-resources.heycong.com-file
+  genFileDirPath: /opt/tomcat/latest/derived-resources.heycong.com-file
   tmpDirPath: "/tmp"
   logging:
     dir: /tmp/derived-resources-log

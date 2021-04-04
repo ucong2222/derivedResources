@@ -105,7 +105,7 @@
 				<configuration>
 					<server>derived-resources__manager_text</server>
 					<url>http://derived-resources.heycong.com:8080/manager/text</url>
-					<path>/ROOT##2</path>
+					<path>/ROOT##3</path>
 				</configuration>
 			</plugin>
 			

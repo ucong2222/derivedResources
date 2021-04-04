@@ -29,9 +29,14 @@ import com.sbs.example.derivedResources.util.Util;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
+@Slf4j
 public class UsrImgController {
+	@Value("${spring.profiles.active:Unknown}")
+	private String activeProfile;
+
 	@Value("${custom.genFileDirPath}")
 	private String genFileDirPath;
 
@@ -49,18 +54,25 @@ public class UsrImgController {
 			@RequestParam(defaultValue = "0") int maxWidth,
 			@RequestParam(defaultValue = "No Image", required = false) String failText,
 			@RequestParam(defaultValue = "300", required = false) int failWidth,
-			@RequestParam(defaultValue = "300", required = false) int failHeight) throws FileNotFoundException {
+			@RequestParam(defaultValue = "300", required = false) int failHeight,
+			@RequestParam(defaultValue = "A3A3A3", required = false) String failTextColor,
+			@RequestParam(defaultValue = "CCCCCC", required = false) String failBgColor) throws FileNotFoundException {
 		String currentUrl = Util.getUrlFromHttpServletRequest(req);
 
+		log.debug("activeProfile : " + activeProfile);
+
+		if (activeProfile.equals("production") && currentUrl.contains("://localhost")) {
+			return fallbackImgEntity(failWidth, failHeight, failText, failTextColor, failBgColor);
+		}
+		
 		DeriveRequest deriveRequest = deriveRequestService.getDeriveRequestByUrl(currentUrl);
 
 		if (deriveRequest == null) {
 			int newDeriveRequestId = 0;
 			try {
 				newDeriveRequestId = deriveRequestService.save(currentUrl, originUrl, width, height, maxWidth);
-			} catch (DownloadFileFailException e) {
-				return Util.httpResponseEntityToOther("https://via.placeholder.com/" + failWidth + "x" + failHeight
-						+ "?text=" + Util.getUrlEncoded(failText));
+			} catch (Exception e) {
+				return fallbackImgEntity(failWidth, failHeight, failText, failTextColor, failBgColor);
 			}
 			
 			deriveRequest = deriveRequestService.getDeriveRequestById(newDeriveRequestId);
@@ -94,6 +106,12 @@ public class UsrImgController {
 		GenFile originGenFile = genFileService.getGenFile(deriveRequest.getGenFileId());
 		return getClientCachedResponseEntity(originGenFile, req);
 
+	}
+	
+	private ResponseEntity fallbackImgEntity(int failWidth, int failHeight, String failText, String failTextColor,
+			String failBgColor) {
+		return Util.httpResponseEntityToOther("https://via.placeholder.com/" + failWidth + "x" + failHeight + "/"
+				+ failBgColor + "/" + failTextColor + "?text=" + Util.getUrlEncoded(failText));
 	}
 
 	@ApiOperation(value = "이미지번호로 이미지 출력", notes = "입력받은 id에 해당하는 genFile을 출력합니다.")
