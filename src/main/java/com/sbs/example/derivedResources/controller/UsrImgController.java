@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.sbs.example.derivedResources.dto.DeriveRequest;
 import com.sbs.example.derivedResources.dto.GenFile;
+import com.sbs.example.derivedResources.exception.DownloadFileFailException;
 import com.sbs.example.derivedResources.service.DeriveRequestService;
 import com.sbs.example.derivedResources.service.GenFileService;
 import com.sbs.example.derivedResources.util.Util;
@@ -43,15 +44,25 @@ public class UsrImgController {
 	private DeriveRequestService deriveRequestService;
 
 	@GetMapping("/img")
-	public ResponseEntity<Resource> showImg(HttpServletRequest req, @RequestParam("url") String originUrl,
+	public ResponseEntity showImg(HttpServletRequest req, @RequestParam("url") String originUrl,
 			@RequestParam(defaultValue = "0") int width, @RequestParam(defaultValue = "0") int height,
-			@RequestParam(defaultValue = "0") int maxWidth) throws FileNotFoundException {
+			@RequestParam(defaultValue = "0") int maxWidth,
+			@RequestParam(defaultValue = "No Image", required = false) String failText,
+			@RequestParam(defaultValue = "300", required = false) int failWidth,
+			@RequestParam(defaultValue = "300", required = false) int failHeight) throws FileNotFoundException {
 		String currentUrl = Util.getUrlFromHttpServletRequest(req);
 
 		DeriveRequest deriveRequest = deriveRequestService.getDeriveRequestByUrl(currentUrl);
 
-		if (deriveRequest == null) {		
-			int newDeriveRequestId = deriveRequestService.save(currentUrl, originUrl, width, height, maxWidth);
+		if (deriveRequest == null) {
+			int newDeriveRequestId = 0;
+			try {
+				newDeriveRequestId = deriveRequestService.save(currentUrl, originUrl, width, height, maxWidth);
+			} catch (DownloadFileFailException e) {
+				return Util.httpResponseEntityToOther("https://via.placeholder.com/" + failWidth + "x" + failHeight
+						+ "?text=" + Util.getUrlEncoded(failText));
+			}
+			
 			deriveRequest = deriveRequestService.getDeriveRequestById(newDeriveRequestId);
 
 			DeriveRequest originDeriveRequest = null;
@@ -76,10 +87,10 @@ public class UsrImgController {
 			}
 
 			deriveRequestService.updateDerivedGenFileId(newDeriveRequestId, derivedGenFile.getId());
-			
+
 			return getClientCachedResponseEntity(derivedGenFile, req);
 		}
-		
+
 		GenFile originGenFile = genFileService.getGenFile(deriveRequest.getGenFileId());
 		return getClientCachedResponseEntity(originGenFile, req);
 

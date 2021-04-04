@@ -33,6 +33,11 @@ import org.apache.tika.Tika;
 import org.imgscalr.Scalr;
 import org.imgscalr.Scalr.Method;
 import org.imgscalr.Scalr.Mode;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+import com.sbs.example.derivedResources.exception.DownloadFileFailException;
 
 public class Util {
 	public static String downloadFileByHttp(String fileUrl, String outputDir) {
@@ -51,8 +56,7 @@ public class Util {
 			FileChannel fileChannel = fileOutputStream.getChannel();
 			fileChannel.transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-			return "";
+			throw new DownloadFileFailException();
 		} catch (IOException e) {
 			e.printStackTrace();
 			return "";
@@ -341,5 +345,18 @@ public class Util {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public static ResponseEntity httpResponseEntityToOther(String url) {
+		URI redirectUri = null;
+		try {
+			redirectUri = new URI(url);
+		} catch (URISyntaxException e1) {
+			return null;
+		}
+
+		HttpHeaders httpHeaders = new HttpHeaders();
+		httpHeaders.setLocation(redirectUri);
+		return new ResponseEntity(httpHeaders, HttpStatus.MOVED_PERMANENTLY);
 	}
 }
